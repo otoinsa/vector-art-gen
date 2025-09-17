@@ -1,5 +1,19 @@
 # GeometryForge - Algorithmic Art Studio
 
+## ⚠️ **IMPORTANT DISCLAIMER**
+
+> **🤖 AI-GENERATED SOFTWARE NOTICE**
+> 
+> This software was generated using artificial intelligence tools and automated coding assistants. While efforts have been made to ensure functionality and code quality:
+> 
+> - **⚡ Software may contain bugs or unexpected behavior**
+> - **🔧 Features may not work as described**
+> - **📋 Code may require debugging or modifications**
+> - **🛠️ Use at your own risk for production purposes**
+> - **🧪 Recommended for experimental and educational use**
+> 
+> **Please test thoroughly before relying on this software for critical applications.**
+
 ![GeometryForge Preview](screenshot.png)
 
 A powerful web-based algorithmic art generator that creates stunning geometric patterns with real-time parameter control and professional export capabilities for plotters and vector graphics.
