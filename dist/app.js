@@ -203,11 +203,107 @@ function updateArtData() {
 	}
 }
 
+function randomizeAllControls() {
+	// Randomize pattern selection
+	const patternSelect = document.getElementById('pattern')
+	const patternOptions = patternSelect.options
+	const randomPatternIndex = Math.floor(Math.random() * patternOptions.length)
+	patternSelect.selectedIndex = randomPatternIndex
+	// Trigger the pattern update
+	updatePattern(patternSelect.value)
+	
+	// Randomize complexity (1-10)
+	const complexitySlider = document.getElementById('complexity')
+	const complexityValue = document.getElementById('complexityValue')
+	const randomComplexity = Math.floor(Math.random() * 10) + 1
+	complexitySlider.value = randomComplexity
+	complexityValue.textContent = randomComplexity
+	// Trigger the complexity update
+	updateComplexity(randomComplexity)
+	
+	// Randomize line weight (0.5-5)
+	const lineWeightSlider = document.getElementById('lineWeight')
+	const lineWeightValue = document.getElementById('lineWeightValue')
+	const randomLineWeight = (Math.random() * 4.5 + 0.5).toFixed(1)
+	lineWeightSlider.value = randomLineWeight
+	lineWeightValue.textContent = randomLineWeight
+	// Trigger the line weight update
+	updateLineWeight(parseFloat(randomLineWeight))
+	
+	// Randomize density (0.1-3)
+	const densitySlider = document.getElementById('density')
+	const densityValue = document.getElementById('densityValue')
+	const randomDensity = (Math.random() * 2.9 + 0.1).toFixed(1)
+	densitySlider.value = randomDensity
+	densityValue.textContent = randomDensity
+	// Trigger the density update
+	updateDensity(parseFloat(randomDensity))
+	
+	// Randomize scale (0.1-20)
+	const scaleSlider = document.getElementById('scale')
+	const scaleValue = document.getElementById('scaleValue')
+	const randomScale = (Math.random() * 19.9 + 0.1).toFixed(1)
+	scaleSlider.value = randomScale
+	scaleValue.textContent = randomScale
+	// Trigger the scale update
+	updateScale(parseFloat(randomScale))
+	
+	// Randomize rotation (0-360, step 15)
+	const rotationSlider = document.getElementById('rotation')
+	const rotationValue = document.getElementById('rotationValue')
+	const randomRotation = Math.floor(Math.random() * 25) * 15 // 0-360 in steps of 15
+	rotationSlider.value = randomRotation
+	rotationValue.textContent = randomRotation + '°'
+	// Trigger the rotation update
+	updateRotation(randomRotation)
+	
+	// Randomize symmetry (1-12)
+	const symmetrySlider = document.getElementById('symmetry')
+	const symmetryValue = document.getElementById('symmetryValue')
+	const randomSymmetry = Math.floor(Math.random() * 12) + 1
+	symmetrySlider.value = randomSymmetry
+	symmetryValue.textContent = randomSymmetry
+	// Trigger the symmetry update
+	updateSymmetry(randomSymmetry)
+	
+	// Randomize spacing (0.5-3)
+	const spacingSlider = document.getElementById('spacing')
+	const spacingValue = document.getElementById('spacingValue')
+	const randomSpacing = (Math.random() * 2.5 + 0.5).toFixed(1)
+	spacingSlider.value = randomSpacing
+	spacingValue.textContent = randomSpacing
+	// Trigger the spacing update
+	updateSpacing(parseFloat(randomSpacing))
+	
+	// Randomize randomness (0-1)
+	const randomnessSlider = document.getElementById('randomness')
+	const randomnessValue = document.getElementById('randomnessValue')
+	const randomRandomness = (Math.random()).toFixed(2)
+	randomnessSlider.value = randomRandomness
+	randomnessValue.textContent = randomRandomness
+	// Trigger the randomness update
+	updateRandomness(parseFloat(randomRandomness))
+	
+	// Randomize iterations (1-20)
+	const iterationsSlider = document.getElementById('iterations')
+	const iterationsValue = document.getElementById('iterationsValue')
+	const randomIterations = Math.floor(Math.random() * 20) + 1
+	iterationsSlider.value = randomIterations
+	iterationsValue.textContent = randomIterations
+	// Trigger the iterations update
+	updateIterations(randomIterations)
+	
+	console.log('All controls randomized and applied to Processing instance')
+}
+
 function generateNewArt() {
 	console.log('generateNewArt called')
 	
 	if (processingInstance) {
-		// Get current settings
+		// Randomize all controls - this will automatically update the Processing instance
+		randomizeAllControls()
+		
+		// Store current art data after randomization
 		const pattern = document.getElementById('pattern').value
 		const complexity = parseInt(document.getElementById('complexity').value)
 		const lineWeight = parseFloat(document.getElementById('lineWeight').value)
@@ -219,41 +315,6 @@ function generateNewArt() {
 		const randomness = parseFloat(document.getElementById('randomness').value)
 		const iterations = parseInt(document.getElementById('iterations').value)
 		
-		console.log('Generating art with:', { pattern, complexity, lineWeight, density, scale, rotation, symmetry, spacing, randomness, iterations })
-		
-		// Force regeneration by calling the Processing sketch functions
-		if (processingInstance.setPattern) {
-			processingInstance.setPattern(pattern)
-		}
-		if (processingInstance.setComplexity) {
-			processingInstance.setComplexity(complexity)
-		}
-		if (processingInstance.setLineWeight) {
-			processingInstance.setLineWeight(lineWeight)
-		}
-		if (processingInstance.setDensity) {
-			processingInstance.setDensity(density)
-		}
-		if (processingInstance.setScale) {
-			processingInstance.setScale(scale)
-		}
-		if (processingInstance.setRotation) {
-			processingInstance.setRotation(rotation)
-		}
-		if (processingInstance.setSymmetry) {
-			processingInstance.setSymmetry(symmetry)
-		}
-		if (processingInstance.setSpacing) {
-			processingInstance.setSpacing(spacing)
-		}
-		if (processingInstance.setRandomness) {
-			processingInstance.setRandomness(randomness)
-		}
-		if (processingInstance.setIterations) {
-			processingInstance.setIterations(iterations)
-		}
-		
-		// Store current art data
 		currentArtData = {
 			pattern: pattern,
 			complexity: complexity,
@@ -268,7 +329,7 @@ function generateNewArt() {
 			timestamp: new Date().toISOString()
 		}
 		
-		console.log('Art regenerated successfully:', currentArtData)
+		console.log('Art regenerated successfully with randomized values:', currentArtData)
 	} else {
 		console.log('Processing instance not ready')
 		alert('Please wait for the art generator to initialize...')

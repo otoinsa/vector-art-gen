@@ -158,30 +158,33 @@ header p {
 .control-group button {
 	border: none;
 	border-radius: 8px;
-	font-size: 11px;
+	font-size: 18px;
 	font-weight: 600;
 	cursor: pointer;
 	transition: all 0.3s ease;
-	padding: 10px 12px;
+	padding: 15px 20px;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: center;
-	gap: 3px;
-	min-height: 50px;
+	justify-content: center;
+	gap: 12px;
+	min-height: 65px;
 	position: relative;
 	overflow: hidden;
 }
 
 .btn-icon {
-	font-size: 16px;
+	font-size: 28px;
 	line-height: 1;
+	order: 1;
 }
 
 .btn-text {
-	font-size: 9px;
+	font-size: 16px;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.3px;
+	order: 2;
 }
 
 /* Primary Generate Button */
@@ -234,6 +237,7 @@ header p {
 	flex: 1;
 	min-height: 600px;
 	order: 1;
+	margin: 0;
 }
 
 #artCanvas {
@@ -245,6 +249,7 @@ header p {
 	height: auto;
 	background: white;
 	border: 3px solid rgba(255,255,255,0.1);
+	margin: 0;
 }
 
 /* Responsive design */
