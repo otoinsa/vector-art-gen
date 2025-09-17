@@ -4,7 +4,7 @@
 
 > **🤖 AI-GENERATED SOFTWARE NOTICE**
 > 
-> This software was generated using artificial intelligence tools and automated coding assistants. While efforts have been made to ensure functionality and code quality:
+> This software was generated using artificial intelligence tools and automated coding assistants. While efforts have been made to ensure functionality and code quality, development was limited to total of 5 hours of agent work:
 > 
 > - **⚡ Software may contain bugs or unexpected behavior**
 > - **🔧 Features may not work as described**
