@@ -123,34 +123,33 @@ var sketch = function(p) {
 	}
 
 	function drawSpiral() {
-		var radius = 10 * spacing
-		var angle = 0
-		var angleStep = 0.1 * complexity * density
-		var maxRadius = (p.width/2 - 50) * scale
-		var numPoints = Math.floor(1000 * density)
+		var numSpirals = Math.max(1, Math.floor(iterations / 2))
 		
-		p.beginShape()
-		p.noFill()
-		for (var i = 0; i < numPoints; i++) {
-			// Add randomness to position
-			var randX = randomness > 0 ? p.random(-randomness * 10, randomness * 10) : 0
-			var randY = randomness > 0 ? p.random(-randomness * 10, randomness * 10) : 0
+		for (var spiral = 0; spiral < numSpirals; spiral++) {
+			var radius = (10 + spiral * 20) * spacing
+			var angle = spiral * p.PI / 4 // Offset each spiral slightly
+			var angleStep = 0.1 * complexity * density
+			var maxRadius = (300 + spiral * 50) * scale
 			
-			var x = centerX + p.cos(angle) * radius + randX
-			var y = centerY + p.sin(angle) * radius + randY
+			p.beginShape()
+			p.noFill()
 			
-			if (i === 0) {
+			while (radius < maxRadius) {
+				// Add randomness to position
+				var randX = randomness > 0 ? p.random(-randomness * 10, randomness * 10) : 0
+				var randY = randomness > 0 ? p.random(-randomness * 10, randomness * 10) : 0
+				
+				var x = centerX + p.cos(angle) * radius + randX
+				var y = centerY + p.sin(angle) * radius + randY
+				
 				p.vertex(x, y)
-			} else {
-				p.vertex(x, y)
+				
+				radius += (0.5 + spiral * 0.2) * spacing
+				angle += angleStep
 			}
 			
-			radius += 0.5 * spacing
-			angle += angleStep
-			
-			if (radius > maxRadius) break
+			p.endShape()
 		}
-		p.endShape()
 	}
 
 	function drawGrid() {

@@ -463,72 +463,87 @@ function generateSVGFromPattern() {
 }
 
 function generateSpiralSVG(params) {
-	let path = ''
-	let radius = 10 * params.spacing
-	let angle = 0
-	let angleStep = 0.1 * params.complexity * params.density
-	const maxRadius = 350 * params.scale
-	const numPoints = Math.floor(1000 * params.density)
+	let svgContent = ''
+	const numSpirals = Math.max(1, Math.floor(params.iterations / 2))
 	
-	// Add randomness helper for SVG
+	// Helper function for SVG randomness
 	function addSVGRandomness(x, y, randomness) {
 		if (randomness <= 0) return { x, y }
-		const randX = (Math.random() - 0.5) * randomness * 10
-		const randY = (Math.random() - 0.5) * randomness * 10
+		const randX = (Math.random() - 0.5) * randomness * 20
+		const randY = (Math.random() - 0.5) * randomness * 20
 		return { x: x + randX, y: y + randY }
 	}
 	
-	let startPos = addSVGRandomness(
-		params.centerX + Math.cos(angle) * radius,
-		params.centerY + Math.sin(angle) * radius,
-		params.randomness
-	)
-	
-	path += `M ${startPos.x} ${startPos.y} `
-	
-	for (let i = 0; i < numPoints; i++) {
-		radius += 0.5 * params.spacing
-		angle += angleStep
+	for (let spiral = 0; spiral < numSpirals; spiral++) {
+		let radius = (10 + spiral * 20) * params.spacing
+		let angle = spiral * Math.PI / 4 // Offset each spiral slightly
+		const angleStep = 0.1 * params.complexity * params.density
+		const maxRadius = (300 + spiral * 50) * params.scale
+		let path = ''
+		let isFirstPoint = true
 		
-		let pos = addSVGRandomness(
-			params.centerX + Math.cos(angle) * radius,
-			params.centerY + Math.sin(angle) * radius,
-			params.randomness
-		)
+		while (radius < maxRadius) {
+			let pos = {
+				x: params.centerX + Math.cos(angle) * radius,
+				y: params.centerY + Math.sin(angle) * radius
+			}
+			
+			pos = addSVGRandomness(pos.x, pos.y, params.randomness)
+			
+			if (isFirstPoint) {
+				path += `M ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} `
+				isFirstPoint = false
+			} else {
+				path += `L ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} `
+			}
+			
+			radius += (0.5 + spiral * 0.2) * params.spacing
+			angle += angleStep
+		}
 		
-		path += `L ${pos.x} ${pos.y} `
-		
-		if (radius > maxRadius) break
+		svgContent += `<path class="line" d="${path}"/>\n`
 	}
 	
-	return `<path class="line" d="${path}"/>`
+	return svgContent
 }
 
 function generateGalaxySVG(params) {
 	let svgContent = ''
 	const numArms = 3 + Math.floor(params.complexity / 2)
-	const armLength = 200
+	const armLength = 200 * params.scale
+	
+	// Helper function for SVG randomness
+	function addSVGRandomness(x, y, randomness) {
+		if (randomness <= 0) return { x, y }
+		const randX = (Math.random() - 0.5) * randomness * 20
+		const randY = (Math.random() - 0.5) * randomness * 20
+		return { x: x + randX, y: y + randY }
+	}
 	
 	for (let arm = 0; arm < numArms; arm++) {
 		const armAngle = (2 * Math.PI / numArms) * arm
 		let path = ''
 		
-		for (let i = 0; i < 100; i++) {
-			const t = i / 100
+		for (let i = 0; i < 100 * params.density; i++) {
+			const t = i / (100 * params.density)
 			const radius = t * armLength
-			const angle = armAngle + t * 4 * Math.PI + Math.sin(t * 10) * 0.5
+			const angle = armAngle + t * 4 * Math.PI * params.complexity + Math.sin(t * 10) * 0.5
 			
-			const x = centerX + Math.cos(angle) * radius
-			const y = centerY + Math.sin(angle) * radius
+			let pos = {
+				x: params.centerX + Math.cos(angle) * radius,
+				y: params.centerY + Math.sin(angle) * radius
+			}
+			
+			pos = addSVGRandomness(pos.x, pos.y, params.randomness)
 			
 			if (i === 0) {
-				path += `M ${x} ${y} `
+				path += `M ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} `
 			} else {
-				path += `L ${x} ${y} `
+				path += `L ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} `
 			}
 		}
 		
-		svgContent += `<path class="line" d="${path}"/>`
+		svgContent += `<path class="line" d="${path}"/>\n`
 	}
 	
 	return svgContent
@@ -568,11 +583,11 @@ function generateNebulaSVG(params) {
 	let svgContent = ''
 	const numCurves = Math.floor(10 * params.complexity * params.density)
 	
-	// Add randomness helper for SVG
+	// Helper function for SVG randomness
 	function addSVGRandomness(x, y, randomness) {
 		if (randomness <= 0) return { x, y }
-		const randX = (Math.random() - 0.5) * randomness * 10
-		const randY = (Math.random() - 0.5) * randomness * 10
+		const randX = (Math.random() - 0.5) * randomness * 20
+		const randY = (Math.random() - 0.5) * randomness * 20
 		return { x: x + randX, y: y + randY }
 	}
 	
@@ -580,28 +595,22 @@ function generateNebulaSVG(params) {
 		let path = ''
 		let firstPoint = true
 		
-		for (let t = 0; t < 1; t += 0.01 / params.density) {
-			// Match the Processing.js nebula calculation
-			const baseRadius = 100 * params.scale
-			const variation = Math.sin(t * 10) * 50 * params.spacing
-			const radius = baseRadius + variation
+		for (let t = 0; t <= 1; t += 0.01) {
+			// Match exact nebula calculation from sketch.js
+			const baseX = params.centerX + Math.cos(t * Math.PI * 4 + i) * (100 + Math.sin(t * 10) * 50)
+			const baseY = params.centerY + Math.sin(t * Math.PI * 4 + i) * (100 + Math.cos(t * 10) * 50)
 			
-			const angle = t * Math.PI * 4 + i * params.spacing
-			let x = params.centerX + Math.cos(angle) * radius
-			let y = params.centerY + Math.sin(angle) * radius
-			
-			// Apply randomness
-			const pos = addSVGRandomness(x, y, params.randomness)
+			let pos = addSVGRandomness(baseX, baseY, params.randomness)
 			
 			if (firstPoint) {
-				path += `M ${pos.x} ${pos.y} `
+				path += `M ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} `
 				firstPoint = false
 			} else {
-				path += `L ${pos.x} ${pos.y} `
+				path += `L ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} `
 			}
 		}
 		
-		svgContent += `<path class="line" d="${path}"/>`
+		svgContent += `<path class="line" d="${path}"/>\n`
 	}
 	
 	return svgContent
@@ -907,6 +916,26 @@ function gcodeLineTo(x1, y1, x2, y2, settings) {
 	return gcode
 }
 
+// New function for continuous path generation
+function gcodeBeginPath(x, y, settings) {
+	let gcode = ''
+	gcode += gcodeMoveTo(x, y, settings, false)
+	gcode += `${settings.penDownCommand} ; Pen down\n`
+	gcode += 'G4 P200 ; Wait 200ms\n'
+	return gcode
+}
+
+function gcodeEndPath(settings) {
+	let gcode = ''
+	gcode += `${settings.penUpCommand} ; Pen up\n`
+	gcode += 'G4 P200 ; Wait 200ms\n'
+	return gcode
+}
+
+function gcodePathLineTo(x, y, settings) {
+	return gcodeMoveTo(x, y, settings, true)
+}
+
 function transformPoint(x, y, params) {
 	const centerX = params.centerX
 	const centerY = params.centerY
@@ -949,78 +978,77 @@ function addRandomness(x, y, randomness) {
 
 function generateSpiralGCode(params, settings) {
 	let gcode = '; Spiral pattern\n'
-	let radius = 10 * params.spacing
-	let angle = 0
-	let angleStep = 0.1 * params.complexity * params.density
-	const maxRadius = 350 * params.scale
-	const numPoints = Math.floor(1000 * params.density)
+	const numSpirals = Math.max(1, Math.floor(params.iterations / 2))
 	
-	let lastPos = {
-		x: params.centerX + Math.cos(angle) * radius,
-		y: params.centerY + Math.sin(angle) * radius
-	}
-	
-	// Apply transformations and randomness
-	lastPos = addRandomness(lastPos.x, lastPos.y, params.randomness)
-	lastPos = transformPoint(lastPos.x, lastPos.y, params)
-	
-	gcode += gcodeMoveTo(lastPos.x, lastPos.y, settings, false)
-	gcode += `${settings.penDownCommand} ; Pen down\n`
-	gcode += 'G4 P200 ; Wait 200ms\n'
-	
-	for (let i = 0; i < numPoints; i++) {
-		radius += 0.5 * params.spacing
-		angle += angleStep
+	for (let spiral = 0; spiral < numSpirals; spiral++) {
+		let radius = (10 + spiral * 20) * params.spacing
+		let angle = spiral * Math.PI / 4 // Offset each spiral slightly
+		const angleStep = 0.1 * params.complexity * params.density
+		const maxRadius = (300 + spiral * 50) * params.scale
 		
+		// Start the continuous path
 		let pos = {
 			x: params.centerX + Math.cos(angle) * radius,
 			y: params.centerY + Math.sin(angle) * radius
 		}
-		
-		// Apply randomness and transformations
 		pos = addRandomness(pos.x, pos.y, params.randomness)
 		pos = transformPoint(pos.x, pos.y, params)
 		
-		gcode += gcodeMoveTo(pos.x, pos.y, settings, true)
+		gcode += gcodeBeginPath(pos.x, pos.y, settings)
 		
-		if (radius > maxRadius) break
+		// Draw continuous spiral
+		while (radius < maxRadius) {
+			radius += (0.5 + spiral * 0.2) * params.spacing
+			angle += angleStep
+			
+			pos = {
+				x: params.centerX + Math.cos(angle) * radius,
+				y: params.centerY + Math.sin(angle) * radius
+			}
+			
+			pos = addRandomness(pos.x, pos.y, params.randomness)
+			pos = transformPoint(pos.x, pos.y, params)
+			
+			gcode += gcodePathLineTo(pos.x, pos.y, settings)
+		}
+		
+		gcode += gcodeEndPath(settings)
 	}
 	
-	gcode += `${settings.penUpCommand} ; Pen up\n`
-	gcode += 'G4 P200 ; Wait 200ms\n'
 	return gcode
 }
 
 function generateGalaxyGCode(params, settings) {
 	let gcode = '; Galaxy pattern\n'
 	const numArms = 3 + Math.floor(params.complexity / 2)
-	const armLength = 200
+	const armLength = 200 * params.scale
 	
 	for (let arm = 0; arm < numArms; arm++) {
 		const armAngle = (2 * Math.PI / numArms) * arm
-		gcode += `; Arm ${arm + 1}\n`
-		
 		let firstPoint = true
-		for (let i = 0; i < 100; i++) {
-			const t = i / 100
+		
+		for (let i = 0; i < 100 * params.density; i++) {
+			const t = i / (100 * params.density)
 			const radius = t * armLength
-			const angle = armAngle + t * 4 * Math.PI + Math.sin(t * 10) * 0.5
+			const angle = armAngle + t * 4 * Math.PI * params.complexity + Math.sin(t * 10) * 0.5
 			
-			const x = centerX + Math.cos(angle) * radius
-			const y = centerY + Math.sin(angle) * radius
+			let pos = {
+				x: params.centerX + Math.cos(angle) * radius,
+				y: params.centerY + Math.sin(angle) * radius
+			}
+			
+			pos = addRandomness(pos.x, pos.y, params.randomness)
+			pos = transformPoint(pos.x, pos.y, params)
 			
 			if (firstPoint) {
-				gcode += gcodeMoveTo(x, y, settings, false)
-				gcode += `${settings.penDownCommand} ; Pen down\n`
-				gcode += 'G4 P200 ; Wait 200ms\n'
+				gcode += gcodeBeginPath(pos.x, pos.y, settings)
 				firstPoint = false
 			} else {
-				gcode += gcodeMoveTo(x, y, settings, true)
+				gcode += gcodePathLineTo(pos.x, pos.y, settings)
 			}
 		}
 		
-		gcode += `${settings.penUpCommand} ; Pen up\n`
-		gcode += 'G4 P200 ; Wait 200ms\n'
+		gcode += gcodeEndPath(settings)
 	}
 	
 	return gcode
@@ -1060,40 +1088,26 @@ function generateNebulaGCode(params, settings) {
 	const numCurves = Math.floor(10 * params.complexity * params.density)
 	
 	for (let i = 0; i < numCurves; i++) {
-		gcode += `; Curve ${i + 1}\n`
 		let firstPoint = true
 		
-		for (let t = 0; t < 1; t += 0.05 / params.density) { // Less dense for G-code
-			// Match the Processing.js nebula calculation
-			const baseRadius = 100 * params.scale
-			const variation = Math.sin(t * 10) * 50 * params.spacing
-			const radius = baseRadius + variation
+		for (let t = 0; t <= 1; t += 0.01) {
+			// Match exact nebula calculation from sketch.js
+			const baseX = params.centerX + Math.cos(t * Math.PI * 4 + i) * (100 + Math.sin(t * 10) * 50)
+			const baseY = params.centerY + Math.sin(t * Math.PI * 4 + i) * (100 + Math.cos(t * 10) * 50)
 			
-			const angle = t * Math.PI * 4 + i * params.spacing
-			let x = params.centerX + Math.cos(angle) * radius
-			let y = params.centerY + Math.sin(angle) * radius
-			
-			// Apply randomness
-			if (params.randomness > 0) {
-				x += (Math.random() - 0.5) * params.randomness * 20
-				y += (Math.random() - 0.5) * params.randomness * 20
-			}
-			
-			// Apply transformations
-			const pos = transformPoint(x, y, params)
+			let pos = { x: baseX, y: baseY }
+			pos = addRandomness(pos.x, pos.y, params.randomness)
+			pos = transformPoint(pos.x, pos.y, params)
 			
 			if (firstPoint) {
-				gcode += gcodeMoveTo(pos.x, pos.y, settings, false)
-				gcode += `${settings.penDownCommand} ; Pen down\n`
-				gcode += 'G4 P200 ; Wait 200ms\n'
+				gcode += gcodeBeginPath(pos.x, pos.y, settings)
 				firstPoint = false
 			} else {
-				gcode += gcodeMoveTo(pos.x, pos.y, settings, true)
+				gcode += gcodePathLineTo(pos.x, pos.y, settings)
 			}
 		}
 		
-		gcode += `${settings.penUpCommand} ; Pen up\n`
-		gcode += 'G4 P200 ; Wait 200ms\n'
+		gcode += gcodeEndPath(settings)
 	}
 	
 	return gcode
@@ -1183,29 +1197,31 @@ function generateRadialGCode(params, settings) {
 
 function generateWaveGCode(params, settings) {
 	let gcode = '; Wave pattern\n'
-	const amplitude = 50 * complexity
-	const frequency = 0.02 * complexity
-	const yOffset = 400
+	const amplitude = 50 * params.complexity * params.scale
+	const frequency = 0.02 * params.complexity
+	const yOffset = params.centerY
+	const numWaves = Math.max(1, Math.floor(params.iterations))
 	
-	for (let wave = 0; wave < complexity; wave++) {
-		gcode += `; Wave ${wave + 1}\n`
+	for (let wave = 0; wave < numWaves; wave++) {
 		let firstPoint = true
+		const waveOffset = wave * 100 - (numWaves * 50)
 		
-		for (let x = 0; x < 800; x += 2) {
-			const y = yOffset + Math.sin(x * frequency * (wave + 1)) * amplitude / (wave + 1)
+		for (let x = 0; x < 1000; x += 2 / params.density) {
+			const y = yOffset + waveOffset + Math.sin((x - params.centerX) * frequency * (wave + 1)) * amplitude / (wave + 1)
+			
+			let pos = { x, y }
+			pos = addRandomness(pos.x, pos.y, params.randomness)
+			pos = transformPoint(pos.x, pos.y, params)
 			
 			if (firstPoint) {
-				gcode += gcodeMoveTo(x, y, settings, false)
-				gcode += `${settings.penDownCommand} ; Pen down\n`
-				gcode += 'G4 P200 ; Wait 200ms\n'
+				gcode += gcodeBeginPath(pos.x, pos.y, settings)
 				firstPoint = false
 			} else {
-				gcode += gcodeMoveTo(x, y, settings, true)
+				gcode += gcodePathLineTo(pos.x, pos.y, settings)
 			}
 		}
 		
-		gcode += `${settings.penUpCommand} ; Pen up\n`
-		gcode += 'G4 P200 ; Wait 200ms\n'
+		gcode += gcodeEndPath(settings)
 	}
 	
 	return gcode
