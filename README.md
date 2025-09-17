@@ -18,6 +18,8 @@
 
 A powerful web-based algorithmic art generator that creates stunning geometric patterns with real-time parameter control and professional export capabilities for plotters and vector graphics.
 
+🚀 **[Try it live at geometryforge.netlify.app](https://geometryforge.netlify.app/)**
+
 ## ✨ Features
 
 ### 🎨 **19 Algorithmic Patterns**
@@ -166,7 +168,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 🔗 Links
 
-- **Live Demo**: [Coming Soon]
+- **Live Demo**: [https://geometryforge.netlify.app/](https://geometryforge.netlify.app/)
 - **Issues**: [GitHub Issues](https://github.com/otoinsa/vector-art-gen/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/otoinsa/vector-art-gen/discussions)
 
