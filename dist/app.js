@@ -421,15 +421,20 @@ function exportToSVG() {
 		// implement a more sophisticated vectorization algorithm
 		const svgContent = generateSVGFromPattern()
 		
-		// Create SVG file content
-		const svgString = `<?xml version="1.0" encoding="UTF-8"?>
+	// Create SVG file content with clipping to match canvas bounds
+	const svgString = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}" xmlns="http://www.w3.org/2000/svg">
 	<defs>
 		<style>
 			.line { fill: none; stroke: #000000; stroke-width: ${currentArtData?.lineWeight || 1}; }
 		</style>
+		<clipPath id="canvasBounds">
+			<rect x="0" y="0" width="${canvas.width}" height="${canvas.height}"/>
+		</clipPath>
 	</defs>
-	${svgContent}
+	<g clip-path="url(#canvasBounds)">
+		${svgContent}
+	</g>
 </svg>`
 		
 		// Create download link
@@ -475,7 +480,7 @@ function generateSVGFromPattern() {
 	
 	let svgContent = ''
 	
-	// Add main group with global transformation
+	// Add main group with global transformation - match Processing.js approach exactly
 	svgContent += `<g transform="translate(${centerX}, ${centerY}) rotate(${rotation}) scale(${scale}) translate(${-centerX}, ${-centerY})">\n`
 	
 	// Generate pattern with symmetry support
@@ -544,12 +549,14 @@ function generateSpiralSVG(params) {
 		let isFirstPoint = true
 		
 		while (radius < maxRadius) {
-			let pos = {
-				x: params.centerX + Math.cos(angle) * radius,
-				y: params.centerY + Math.sin(angle) * radius
-			}
+			// Match Processing exactly: p.random(-randomness * 10, randomness * 10)
+			const randX = params.randomness > 0 ? (Math.random() - 0.5) * params.randomness * 20 : 0
+			const randY = params.randomness > 0 ? (Math.random() - 0.5) * params.randomness * 20 : 0
 			
-			pos = addSVGRandomness(pos.x, pos.y, params.randomness)
+			let pos = {
+				x: params.centerX + Math.cos(angle) * radius + randX,
+				y: params.centerY + Math.sin(angle) * radius + randY
+			}
 			
 			if (isFirstPoint) {
 				path += `M ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} `
@@ -571,7 +578,7 @@ function generateSpiralSVG(params) {
 function generateGalaxySVG(params) {
 	let svgContent = ''
 	const numArms = 3 + Math.floor(params.complexity / 2)
-	const armLength = 200 * params.scale
+	const armLength = 200
 	
 	// Helper function for SVG randomness
 	function addSVGRandomness(x, y, randomness) {
@@ -693,14 +700,14 @@ function generateTreeSVG(params) {
 		drawBranch(endX, endY, angle - Math.PI/6, length * 0.7, depth - 1)
 	}
 	
-	drawBranch(centerX, baseY, -Math.PI/2, 100, Math.min(complexity, 8))
+	drawBranch(params.centerX, params.centerY + 200, -Math.PI/2, 100, Math.min(params.complexity, 8))
 	
 	return svgContent
 }
 
 function generateMandalaSVG(params) {
 	let svgContent = ''
-	const numRings = 3 + complexity
+	const numRings = 3 + params.complexity
 	const baseRadius = 50
 	
 	for (let ring = 0; ring < numRings; ring++) {
@@ -709,10 +716,10 @@ function generateMandalaSVG(params) {
 		
 		for (let i = 0; i < numElements; i++) {
 			const angle = (2 * Math.PI / numElements) * i
-			const x1 = centerX + Math.cos(angle) * radius
-			const y1 = centerY + Math.sin(angle) * radius
-			const x2 = centerX + Math.cos(angle) * (radius + 20)
-			const y2 = centerY + Math.sin(angle) * (radius + 20)
+			const x1 = params.centerX + Math.cos(angle) * radius
+			const y1 = params.centerY + Math.sin(angle) * radius
+			const x2 = params.centerX + Math.cos(angle) * (radius + 20)
+			const y2 = params.centerY + Math.sin(angle) * (radius + 20)
 			
 			svgContent += `<line class="line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`
 		}
@@ -724,7 +731,7 @@ function generateMandalaSVG(params) {
 function generateRadialSVG(params) {
 	let svgContent = ''
 	const numLines = Math.floor(20 * params.complexity * params.density)
-	const radius = 350 * params.scale
+	const radius = (Math.min(1000, 1000) / 2 - 50) * params.scale
 	const innerRadius = 20 * params.spacing
 	
 	// Add randomness helper for SVG
@@ -738,23 +745,17 @@ function generateRadialSVG(params) {
 	for (let i = 0; i < numLines; i++) {
 		const angle = (2 * Math.PI / numLines) * i
 		
+		// Match Processing exactly: p.random(0.8, 1.2)
 		const radiusVariation = params.randomness > 0 ? 
 			(0.8 + Math.random() * 0.4) : 1
 		const currentRadius = radius * radiusVariation
 		
-		let pos1 = addSVGRandomness(
-			params.centerX + Math.cos(angle) * innerRadius,
-			params.centerY + Math.sin(angle) * innerRadius,
-			params.randomness
-		)
+		const x1 = params.centerX + Math.cos(angle) * innerRadius
+		const y1 = params.centerY + Math.sin(angle) * innerRadius
+		const x2 = params.centerX + Math.cos(angle) * currentRadius
+		const y2 = params.centerY + Math.sin(angle) * currentRadius
 		
-		let pos2 = addSVGRandomness(
-			params.centerX + Math.cos(angle) * currentRadius,
-			params.centerY + Math.sin(angle) * currentRadius,
-			params.randomness
-		)
-		
-		svgContent += `<line class="line" x1="${pos1.x}" y1="${pos1.y}" x2="${pos2.x}" y2="${pos2.y}"/>`
+		svgContent += `<line class="line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`
 	}
 	
 	return svgContent
@@ -762,15 +763,28 @@ function generateRadialSVG(params) {
 
 function generateWaveSVG(params) {
 	let svgContent = ''
-	const amplitude = 50 * complexity
-	const frequency = 0.02 * complexity
-	const yOffset = 400
+	const amplitude = 50 * params.complexity
+	const frequency = 0.02 * params.complexity
+	const yOffset = params.centerY
 	
-	for (let wave = 0; wave < complexity; wave++) {
-		let path = ''
+	// First wave (main wave)
+	let path = ''
+	for (let x = 0; x < 1000; x += 2) {
+		const y = yOffset + Math.sin(x * frequency) * amplitude
 		
-		for (let x = 0; x < 800; x += 2) {
-			const y = yOffset + Math.sin(x * frequency * (wave + 1)) * amplitude / (wave + 1)
+		if (x === 0) {
+			path += `M ${x} ${y} `
+		} else {
+			path += `L ${x} ${y} `
+		}
+	}
+	svgContent += `<path class="line" d="${path}"/>`
+	
+	// Additional waves (complexity - 1)
+	for (let i = 1; i < params.complexity; i++) {
+		let path = ''
+		for (let x = 0; x < 1000; x += 2) {
+			const y = yOffset + Math.sin(x * frequency * (i + 1)) * amplitude / (i + 1)
 			
 			if (x === 0) {
 				path += `M ${x} ${y} `
@@ -778,7 +792,6 @@ function generateWaveSVG(params) {
 				path += `L ${x} ${y} `
 			}
 		}
-		
 		svgContent += `<path class="line" d="${path}"/>`
 	}
 	
@@ -787,7 +800,7 @@ function generateWaveSVG(params) {
 
 function generateGridSVG(params) {
 	let svgContent = ''
-	const spacing = 20 / complexity
+	const spacing = 20 / params.complexity * params.spacing
 	let offset = 0
 	
 	// Vertical lines
@@ -813,8 +826,8 @@ function generateDefaultSVG(params) {
 	
 	for (let i = 0; i < numLines; i++) {
 		const angle = (2 * Math.PI / numLines) * i
-		const x = params.centerX + Math.cos(angle) * 200 * params.scale
-		const y = params.centerY + Math.sin(angle) * 200 * params.scale
+		const x = params.centerX + Math.cos(angle) * 200
+		const y = params.centerY + Math.sin(angle) * 200
 		
 		svgContent += `<line class="line" x1="${params.centerX}" y1="${params.centerY}" x2="${x}" y2="${y}"/>`
 	}
@@ -833,8 +846,8 @@ function exportToGCode() {
 		
 		// G-code settings for pen plotters
 		const settings = {
-			feedRate: 1000,        // Feed rate for drawing moves (mm/min)
-			travelRate: 3000,      // Feed rate for travel moves (mm/min)
+			feedRate: 200,         // Feed rate for drawing moves (mm/min) - slow for quality
+			travelRate: 800,       // Feed rate for travel moves (mm/min) - faster but still controlled
 			penUpCommand: 'M3 S90',   // Servo command to lift pen (adjust for your plotter)
 			penDownCommand: 'M3 S30', // Servo command to lower pen (adjust for your plotter)
 			scaleX: 0.1,           // Scale factor for X axis (canvas units to mm)
@@ -953,6 +966,12 @@ function generateGCodeFromPattern(settings) {
 }
 
 function gcodeMoveTo(x, y, settings, penDown = false) {
+	// Check if coordinates are within canvas bounds (0-1000)
+	if (x < 0 || x > 1000 || y < 0 || y > 1000) {
+		// Skip moves outside canvas bounds to match canvas clipping
+		return ''
+	}
+	
 	const scaledX = (x * settings.scaleX + settings.offsetX).toFixed(3)
 	const scaledY = (y * settings.scaleY + settings.offsetY).toFixed(3)
 	const feedRate = penDown ? settings.feedRate : settings.travelRate
@@ -967,6 +986,14 @@ function gcodeMoveTo(x, y, settings, penDown = false) {
 }
 
 function gcodeLineTo(x1, y1, x2, y2, settings) {
+	// Check if both points are outside bounds - skip entire line
+	const p1InBounds = (x1 >= 0 && x1 <= 1000 && y1 >= 0 && y1 <= 1000)
+	const p2InBounds = (x2 >= 0 && x2 <= 1000 && y2 >= 0 && y2 <= 1000)
+	
+	if (!p1InBounds && !p2InBounds) {
+		return '' // Skip lines completely outside bounds
+	}
+	
 	let gcode = ''
 	gcode += gcodeMoveTo(x1, y1, settings, false) // Move to start without pen
 	gcode += `${settings.penDownCommand} ; Pen down\n`
@@ -979,6 +1006,11 @@ function gcodeLineTo(x1, y1, x2, y2, settings) {
 
 // New function for continuous path generation
 function gcodeBeginPath(x, y, settings) {
+	// Check if starting point is in bounds
+	if (x < 0 || x > 1000 || y < 0 || y > 1000) {
+		return '' // Don't start paths outside bounds
+	}
+	
 	let gcode = ''
 	gcode += gcodeMoveTo(x, y, settings, false)
 	gcode += `${settings.penDownCommand} ; Pen down\n`
@@ -1003,25 +1035,25 @@ function transformPoint(x, y, params) {
 	const scale = params.scale || 1
 	const rotation = params.rotation || 0
 	
-	// Translate to origin
+	// Translate to origin for rotation around center
 	let tx = x - centerX
 	let ty = y - centerY
 	
-	// Apply scale
-	tx *= scale
-	ty *= scale
-	
-	// Apply rotation
+	// Apply rotation first
 	const rad = rotation * Math.PI / 180
 	const cos = Math.cos(rad)
 	const sin = Math.sin(rad)
 	const rx = tx * cos - ty * sin
 	const ry = tx * sin + ty * cos
 	
-	// Translate back
+	// Apply scale around center
+	const sx = rx * scale
+	const sy = ry * scale
+	
+	// Translate back to final position
 	return {
-		x: rx + centerX,
-		y: ry + centerY
+		x: sx + centerX,
+		y: sy + centerY
 	}
 }
 
@@ -1192,14 +1224,14 @@ function generateTreeGCode(params, settings) {
 		return parentGcode
 	}
 	
-	gcode = drawBranch(centerX, baseY, -Math.PI/2, 100, Math.min(complexity, 8), gcode)
+	gcode = drawBranch(params.centerX, params.centerY + 200, -Math.PI/2, 100 * params.scale, Math.min(params.complexity, 8), gcode)
 	
 	return gcode
 }
 
 function generateMandalaGCode(params, settings) {
 	let gcode = '; Mandala pattern\n'
-	const numRings = 3 + complexity
+	const numRings = 3 + params.complexity
 	const baseRadius = 50
 	
 	for (let ring = 0; ring < numRings; ring++) {
@@ -1208,12 +1240,10 @@ function generateMandalaGCode(params, settings) {
 		
 		for (let i = 0; i < numElements; i++) {
 			const angle = (2 * Math.PI / numElements) * i
-			const x1 = centerX + Math.cos(angle) * radius
-			const y1 = centerY + Math.sin(angle) * radius
-			const x2 = centerX + Math.cos(angle) * (radius + 20)
-			const y2 = centerY + Math.sin(angle) * (radius + 20)
+			let pos1 = transformPoint(params.centerX + Math.cos(angle) * radius, params.centerY + Math.sin(angle) * radius, params)
+			let pos2 = transformPoint(params.centerX + Math.cos(angle) * (radius + 20), params.centerY + Math.sin(angle) * (radius + 20), params)
 			
-			gcode += gcodeLineTo(x1, y1, x2, y2, settings)
+			gcode += gcodeLineTo(pos1.x, pos1.y, pos2.x, pos2.y, settings)
 		}
 	}
 	
@@ -1223,32 +1253,20 @@ function generateMandalaGCode(params, settings) {
 function generateRadialGCode(params, settings) {
 	let gcode = '; Radial pattern\n'
 	const numLines = Math.floor(20 * params.complexity * params.density)
-	const radius = 350 * params.scale
+	const radius = (Math.min(1000, 1000) / 2 - 50) * params.scale
 	const innerRadius = 20 * params.spacing
 	
 	for (let i = 0; i < numLines; i++) {
 		const angle = (2 * Math.PI / numLines) * i
 		
-		// Calculate base positions
-		let pos1 = {
-			x: params.centerX + Math.cos(angle) * innerRadius,
-			y: params.centerY + Math.sin(angle) * innerRadius
-		}
-		
+		// Match Processing exactly: p.random(0.8, 1.2)
 		const radiusVariation = params.randomness > 0 ? 
 			(0.8 + Math.random() * 0.4) : 1
 		const currentRadius = radius * radiusVariation
 		
-		let pos2 = {
-			x: params.centerX + Math.cos(angle) * currentRadius,
-			y: params.centerY + Math.sin(angle) * currentRadius
-		}
-		
-		// Apply randomness and transformations
-		pos1 = addRandomness(pos1.x, pos1.y, params.randomness)
-		pos2 = addRandomness(pos2.x, pos2.y, params.randomness)
-		pos1 = transformPoint(pos1.x, pos1.y, params)
-		pos2 = transformPoint(pos2.x, pos2.y, params)
+		// Calculate positions and apply transform
+		let pos1 = transformPoint(params.centerX + Math.cos(angle) * innerRadius, params.centerY + Math.sin(angle) * innerRadius, params)
+		let pos2 = transformPoint(params.centerX + Math.cos(angle) * currentRadius, params.centerY + Math.sin(angle) * currentRadius, params)
 		
 		gcode += gcodeLineTo(pos1.x, pos1.y, pos2.x, pos2.y, settings)
 	}
@@ -1290,7 +1308,7 @@ function generateWaveGCode(params, settings) {
 
 function generateGridGCode(params, settings) {
 	let gcode = '; Grid pattern\n'
-	const spacing = 20 / complexity
+	const spacing = 20 / params.complexity * params.spacing
 	let offset = 0
 	
 	// Vertical lines

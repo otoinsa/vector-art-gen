@@ -17,6 +17,25 @@
 		</header>
 		
 		<div class="controls">
+			<div class="control-group button-group">
+				<button id="generate" class="primary-btn">
+					<span class="btn-icon">✨</span>
+					<span class="btn-text">Generate Art</span>
+				</button>
+				<button id="exportPDF" class="export-btn">
+					<span class="btn-icon">📄</span>
+					<span class="btn-text">Export PDF</span>
+				</button>
+				<button id="exportSVG" class="export-btn">
+					<span class="btn-icon">🎨</span>
+					<span class="btn-text">Export SVG</span>
+				</button>
+				<button id="exportGCode" class="export-btn">
+					<span class="btn-icon">🔧</span>
+					<span class="btn-text">Export G-Code</span>
+				</button>
+			</div>
+			
 			<div class="control-group">
 				<label for="pattern">Pattern Type:</label>
 				<select id="pattern">
@@ -102,25 +121,6 @@
 				<label for="iterations">Iterations:</label>
 				<input type="range" id="iterations" min="1" max="20" step="1" value="5">
 				<span id="iterationsValue">5</span>
-			</div>
-			
-			<div class="control-group button-group">
-				<button id="generate" class="primary-btn">
-					<span class="btn-icon">✨</span>
-					<span class="btn-text">Generate Art</span>
-				</button>
-				<button id="exportPDF" class="export-btn">
-					<span class="btn-icon">📄</span>
-					<span class="btn-text">Export PDF</span>
-				</button>
-				<button id="exportSVG" class="export-btn">
-					<span class="btn-icon">🎨</span>
-					<span class="btn-text">Export SVG</span>
-				</button>
-				<button id="exportGCode" class="export-btn">
-					<span class="btn-icon">🔧</span>
-					<span class="btn-text">Export G-Code</span>
-				</button>
 			</div>
 		</div>
 		
