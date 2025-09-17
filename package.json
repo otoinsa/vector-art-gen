@@ -1,0 +1,24 @@
+{
+	"name": "vector-art-generator",
+	"version": "1.0.0",
+	"description": "Universe-inspired vector art generator for plotters",
+	"main": "server.py",
+	"scripts": {
+		"start": "python3 server.py",
+		"test": "node test.js",
+		"install-deps": "npm install"
+	},
+	"dependencies": {
+		"puppeteer": "^21.0.0",
+		"sharp": "^0.34.3"
+	},
+	"keywords": [
+		"vector-art",
+		"plotter",
+		"generative-art",
+		"processing.js",
+		"universe-patterns"
+	],
+	"author": "Vector Art Generator",
+	"license": "MIT"
+}

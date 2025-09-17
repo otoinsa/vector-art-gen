@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="GeometryForge - Professional algorithmic art studio for creating plotter-ready geometric patterns, vector art, and mathematical visualizations">
+	<title>GeometryForge - Algorithmic Art Studio</title>
+	<link rel="stylesheet" href="styles.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.6.6/processing.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<header>
+			<h1>⬢ GeometryForge</h1>
+			<p>Algorithmic Art Studio • Plotter-Ready Geometric Patterns</p>
+		</header>
+		
+		<div class="controls">
+			<div class="control-group">
+				<label for="pattern">Pattern Type:</label>
+				<select id="pattern">
+					<optgroup label="Cosmic Structures">
+						<option value="spiral">Spiral Galaxy</option>
+						<option value="galaxy">Galaxy Arms</option>
+						<option value="constellation">Constellation</option>
+						<option value="nebula">Nebula Clouds</option>
+						<option value="orbit">Orbital Systems</option>
+					</optgroup>
+					<optgroup label="Natural Forms">
+						<option value="tree">Fractal Tree</option>
+						<option value="flower">Flower Petals</option>
+						<option value="snowflake">Snowflake</option>
+						<option value="wave">Wave Patterns</option>
+						<option value="flow">Flow Streams</option>
+					</optgroup>
+					<optgroup label="Geometric Structures">
+						<option value="grid">Grid Lines</option>
+						<option value="radial">Radial Lines</option>
+						<option value="crystal">Crystal Formation</option>
+						<option value="lattice">Lattice Pattern</option>
+						<option value="mandala">Mandala</option>
+					</optgroup>
+					<optgroup label="Scientific Patterns">
+						<option value="molecule">Molecular Structure</option>
+						<option value="dna">DNA Helix</option>
+						<option value="voronoi">Voronoi Diagram</option>
+						<option value="random">Random Connections</option>
+					</optgroup>
+				</select>
+			</div>
+			
+			<div class="control-group">
+				<label for="complexity">Complexity:</label>
+				<input type="range" id="complexity" min="1" max="10" value="5">
+				<span id="complexityValue">5</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="lineWeight">Line Weight:</label>
+				<input type="range" id="lineWeight" min="0.5" max="5" step="0.5" value="1">
+				<span id="lineWeightValue">1</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="density">Density:</label>
+				<input type="range" id="density" min="0.1" max="3" step="0.1" value="1">
+				<span id="densityValue">1</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="scale">Scale:</label>
+				<input type="range" id="scale" min="0.1" max="20" step="0.1" value="1">
+				<span id="scaleValue">1</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="rotation">Rotation:</label>
+				<input type="range" id="rotation" min="0" max="360" step="15" value="0">
+				<span id="rotationValue">0°</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="symmetry">Symmetry:</label>
+				<input type="range" id="symmetry" min="1" max="12" step="1" value="1">
+				<span id="symmetryValue">1</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="spacing">Spacing:</label>
+				<input type="range" id="spacing" min="0.5" max="3" step="0.1" value="1">
+				<span id="spacingValue">1</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="randomness">Randomness:</label>
+				<input type="range" id="randomness" min="0" max="1" step="0.05" value="0">
+				<span id="randomnessValue">0</span>
+			</div>
+			
+			<div class="control-group">
+				<label for="iterations">Iterations:</label>
+				<input type="range" id="iterations" min="1" max="20" step="1" value="5">
+				<span id="iterationsValue">5</span>
+			</div>
+			
+			<div class="control-group button-group">
+				<button id="generate" class="primary-btn">
+					<span class="btn-icon">✨</span>
+					<span class="btn-text">Generate Art</span>
+				</button>
+				<button id="exportPDF" class="export-btn">
+					<span class="btn-icon">📄</span>
+					<span class="btn-text">Export PDF</span>
+				</button>
+				<button id="exportSVG" class="export-btn">
+					<span class="btn-icon">🎨</span>
+					<span class="btn-text">Export SVG</span>
+				</button>
+				<button id="exportGCode" class="export-btn">
+					<span class="btn-icon">🔧</span>
+					<span class="btn-text">Export G-Code</span>
+				</button>
+			</div>
+		</div>
+		
+		<div class="canvas-container">
+			<canvas id="artCanvas" width="1000" height="1000"></canvas>
+		</div>
+	</div>
+	
+	<script src="sketch.js"></script>
+	<script src="app.js"></script>
+</body>
+</html>

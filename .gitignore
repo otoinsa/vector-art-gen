@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Test files
+test-*.png
+test-*.json
+canvas-*.png
+*test*.js
+*test*.json
+test-results/
+*.command
+
+# Development files
+NEXT-AGENT-TODO.md
+simple-test.js
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
