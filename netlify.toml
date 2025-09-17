@@ -1,0 +1,33 @@
+[build]
+  command = ""          # don't build anything
+  publish = "dist"      # serve dist/ directly
+
+[build.environment]
+  NODE_VERSION = "none" # disable Node detection
+
+# Optional: Set custom headers for better performance
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+# Ensure proper MIME types
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Content-Type = "text/css"
