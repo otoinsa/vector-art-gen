@@ -50,8 +50,12 @@ def main():
 	# Get the directory where this script is located
 	script_dir = Path(__file__).parent.absolute()
 	
-	# Change to the script directory
-	os.chdir(script_dir)
+	# Change to the dist directory
+	dist_dir = script_dir / 'dist'
+	if dist_dir.exists():
+		os.chdir(dist_dir)
+	else:
+		os.chdir(script_dir)
 	
 	# Check if required files exist
 	required_files = ['index.html', 'styles.css', 'app.js', 'sketch.js']
@@ -77,7 +81,7 @@ def main():
 		
 		print("🌌 Vector Art Generator Server")
 		print("=" * 40)
-		print(f"📁 Serving from: {script_dir}")
+		print(f"📁 Serving from: {os.getcwd()}")
 		print(f"🌐 Server URL: {server_url}")
 		print(f"🔌 Port: {port}")
 		print("=" * 40)
