@@ -426,7 +426,7 @@ function exportToSVG() {
 <svg width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}" xmlns="http://www.w3.org/2000/svg">
 	<defs>
 		<style>
-			.line { fill: none; stroke: #000000; stroke-width: ${currentArtData?.lineWeight || 1}; }
+			.line { fill: none; stroke: #000000; stroke-width: ${currentArtData?.lineWeight || 1}; stroke-linecap: round; stroke-linejoin: round; }
 		</style>
 		<clipPath id="canvasBounds">
 			<rect x="0" y="0" width="${canvas.width}" height="${canvas.height}"/>
@@ -469,12 +469,14 @@ function generateSVGFromPattern() {
 	const spacing = currentArtData.spacing || 1
 	const randomness = currentArtData.randomness || 0
 	const iterations = currentArtData.iterations || 5
-	const centerX = 500
-	const centerY = 500
+	const width = currentArtData.width || 1000
+	const height = currentArtData.height || 1000
+	const centerX = width / 2
+	const centerY = height / 2
 	
 	// Create parameters object
 	const params = {
-		centerX, centerY, complexity, density, scale, rotation, 
+		centerX, centerY, width, height, complexity, density, scale, rotation, 
 		symmetry, spacing, randomness, iterations
 	}
 	
@@ -488,7 +490,7 @@ function generateSVGFromPattern() {
 		const symRotation = (360 / symmetry) * sym
 		svgContent += `  <g transform="translate(${centerX}, ${centerY}) rotate(${symRotation}) translate(${-centerX}, ${-centerY})">\n`
 		
-		switch (pattern) {
+			switch (pattern) {
 			case 'spiral':
 				svgContent += `    ${generateSpiralSVG(params)}\n`
 				break
@@ -516,6 +518,36 @@ function generateSVGFromPattern() {
 			case 'grid':
 				svgContent += `    ${generateGridSVG(params)}\n`
 				break
+				case 'random':
+					svgContent += `    ${generateRandomSVG(params)}\n`
+					break
+				case 'crystal':
+					svgContent += `    ${generateCrystalSVG(params)}\n`
+					break
+				case 'molecule':
+					svgContent += `    ${generateMoleculeSVG(params)}\n`
+					break
+				case 'dna':
+					svgContent += `    ${generateDNASVG(params)}\n`
+					break
+				case 'flower':
+					svgContent += `    ${generateFlowerSVG(params)}\n`
+					break
+				case 'snowflake':
+					svgContent += `    ${generateSnowflakeSVG(params)}\n`
+					break
+				case 'lattice':
+					svgContent += `    ${generateLatticeSVG(params)}\n`
+					break
+				case 'voronoi':
+					svgContent += `    ${generateVoronoiSVG(params)}\n`
+					break
+				case 'flow':
+					svgContent += `    ${generateFlowSVG(params)}\n`
+					break
+				case 'orbit':
+					svgContent += `    ${generateOrbitSVG(params)}\n`
+					break
 			default:
 				svgContent += `    ${generateDefaultSVG(params)}\n`
 		}
@@ -621,11 +653,10 @@ function generateConstellationSVG(params) {
 	const numStars = Math.floor(20 * params.complexity * params.density)
 	const stars = []
 	
-	// Generate star positions
 	for (let i = 0; i < numStars; i++) {
 		stars.push({
-			x: Math.random() * 800,
-			y: Math.random() * 800
+			x: Math.random() * params.width,
+			y: Math.random() * params.height
 		})
 	}
 	
@@ -663,10 +694,10 @@ function generateNebulaSVG(params) {
 		let path = ''
 		let firstPoint = true
 		
-		for (let t = 0; t <= 1; t += 0.01) {
+		for (let t = 0; t < 1; t += 0.01) {
 			// Match exact nebula calculation from sketch.js
-			const baseX = params.centerX + Math.cos(t * Math.PI * 4 + i) * (100 + Math.sin(t * 10) * 50)
-			const baseY = params.centerY + Math.sin(t * Math.PI * 4 + i) * (100 + Math.cos(t * 10) * 50)
+			const baseX = params.centerX + Math.cos(t * Math.PI * 2 * 2 + i) * (100 + Math.sin(t * 10) * 50)
+			const baseY = params.centerY + Math.sin(t * Math.PI * 2 * 2 + i) * (100 + Math.cos(t * 10) * 50)
 			
 			let pos = addSVGRandomness(baseX, baseY, params.randomness)
 			
@@ -731,7 +762,7 @@ function generateMandalaSVG(params) {
 function generateRadialSVG(params) {
 	let svgContent = ''
 	const numLines = Math.floor(20 * params.complexity * params.density)
-	const radius = (Math.min(1000, 1000) / 2 - 50) * params.scale
+	const radius = (Math.min(params.width, params.height) / 2 - 50) * params.scale
 	const innerRadius = 20 * params.spacing
 	
 	// Add randomness helper for SVG
@@ -769,7 +800,7 @@ function generateWaveSVG(params) {
 	
 	// First wave (main wave)
 	let path = ''
-	for (let x = 0; x < 1000; x += 2) {
+	for (let x = 0; x < params.width; x += 2) {
 		const y = yOffset + Math.sin(x * frequency) * amplitude
 		
 		if (x === 0) {
@@ -783,7 +814,7 @@ function generateWaveSVG(params) {
 	// Additional waves (complexity - 1)
 	for (let i = 1; i < params.complexity; i++) {
 		let path = ''
-		for (let x = 0; x < 1000; x += 2) {
+		for (let x = 0; x < params.width; x += 2) {
 			const y = yOffset + Math.sin(x * frequency * (i + 1)) * amplitude / (i + 1)
 			
 			if (x === 0) {
@@ -804,15 +835,15 @@ function generateGridSVG(params) {
 	let offset = 0
 	
 	// Vertical lines
-	for (let x = 0; x < 800; x += spacing) {
-		svgContent += `<line class="line" x1="${x + offset}" y1="0" x2="${x + offset}" y2="800"/>`
+	for (let x = 0; x < params.width; x += spacing) {
+		svgContent += `<line class="line" x1="${x + offset}" y1="0" x2="${x + offset}" y2="${params.height}"/>`
 		offset += 0.5
 	}
 	
 	// Horizontal lines
 	offset = 0
-	for (let y = 0; y < 800; y += spacing) {
-		svgContent += `<line class="line" x1="0" y1="${y + offset}" x2="800" y2="${y + offset}"/>`
+	for (let y = 0; y < params.height; y += spacing) {
+		svgContent += `<line class="line" x1="0" y1="${y + offset}" x2="${params.width}" y2="${y + offset}"/>`
 		offset += 0.5
 	}
 	
@@ -832,6 +863,210 @@ function generateDefaultSVG(params) {
 		svgContent += `<line class="line" x1="${params.centerX}" y1="${params.centerY}" x2="${x}" y2="${y}"/>`
 	}
 	
+	return svgContent
+}
+
+// Additional SVG generators to mirror canvas patterns
+
+function generateRandomSVG(params) {
+	let svgContent = ''
+	const count = 50 * params.complexity
+	for (let i = 0; i < count; i++) {
+		const x1 = Math.random() * params.width
+		const y1 = Math.random() * params.height
+		const x2 = Math.random() * params.width
+		const y2 = Math.random() * params.height
+		svgContent += `<line class="line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`
+	}
+	return svgContent
+}
+
+function generateCrystalSVG(params) {
+	let svgContent = ''
+	const numFaces = 6 + params.complexity
+	const radius = 150 * params.scale
+	for (let i = 0; i < numFaces; i++) {
+		const angle1 = (2 * Math.PI / numFaces) * i
+		const angle2 = (2 * Math.PI / numFaces) * ((i + 1) % numFaces)
+		const x1 = params.centerX + Math.cos(angle1) * radius
+		const y1 = params.centerY + Math.sin(angle1) * radius
+		const x2 = params.centerX + Math.cos(angle2) * radius
+		const y2 = params.centerY + Math.sin(angle2) * radius
+		svgContent += `<line class="line" x1="${params.centerX}" y1="${params.centerY}" x2="${x1}" y2="${y1}"/>`
+		svgContent += `<line class="line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`
+	}
+	return svgContent
+}
+
+function generateMoleculeSVG(params) {
+	let svgContent = ''
+	const numAtoms = 8 + params.complexity * 2
+	const atoms = []
+	for (let i = 0; i < numAtoms; i++) {
+		atoms.push({
+			x: params.centerX + (Math.random() * 300 - 150),
+			y: params.centerY + (Math.random() * 300 - 150)
+		})
+	}
+	for (let i = 0; i < atoms.length; i++) {
+		for (let j = i + 1; j < atoms.length; j++) {
+			const dx = atoms[i].x - atoms[j].x
+			const dy = atoms[i].y - atoms[j].y
+			const distance = Math.sqrt(dx * dx + dy * dy)
+			if (distance < 80) {
+				svgContent += `<line class="line" x1="${atoms[i].x}" y1="${atoms[i].y}" x2="${atoms[j].x}" y2="${atoms[j].y}"/>`
+			}
+		}
+	}
+	return svgContent
+}
+
+function generateDNASVG(params) {
+	let svgContent = ''
+	const height = 200 * params.scale
+	const width = 50 * params.scale
+	const turns = 5 * params.complexity
+	let path1 = ''
+	let path2 = ''
+	for (let i = 0; i < 100; i++) {
+		const t = i / 100
+		const x1 = params.centerX + Math.cos(t * turns * 2 * Math.PI) * width
+		const y1 = params.centerY + t * height - height / 2
+		if (i === 0) path1 += `M ${x1} ${y1} `
+		else path1 += `L ${x1} ${y1} `
+		const x2 = params.centerX + Math.cos(t * turns * 2 * Math.PI + Math.PI) * width
+		const y2 = params.centerY + t * height - height / 2
+		if (i === 0) path2 += `M ${x2} ${y2} `
+		else path2 += `L ${x2} ${y2} `
+	}
+	svgContent += `<path class="line" d="${path1}"/>`
+	svgContent += `<path class="line" d="${path2}"/>`
+	for (let i = 0; i < 20; i++) {
+		const t = i / 20
+		const x1 = params.centerX + Math.cos(t * turns * 2 * Math.PI) * width
+		const y1 = params.centerY + t * height - height / 2
+		const x2 = params.centerX + Math.cos(t * turns * 2 * Math.PI + Math.PI) * width
+		const y2 = params.centerY + t * height - height / 2
+		svgContent += `<line class="line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`
+	}
+	return svgContent
+}
+
+function generateFlowerSVG(params) {
+	let svgContent = ''
+	const numPetals = 8 + params.complexity
+	const petalLength = 100 * params.scale
+	for (let i = 0; i < numPetals; i++) {
+		const angle = (2 * Math.PI / numPetals) * i
+		let path = `M ${params.centerX} ${params.centerY} `
+		for (let t = 0; t <= 1.0001; t += 0.1) {
+			const radius = t * petalLength
+			const petalWidth = Math.sin(t * Math.PI) * 20
+			const x = params.centerX + Math.cos(angle) * radius + Math.cos(angle + Math.PI / 2) * petalWidth
+			const y = params.centerY + Math.sin(angle) * radius + Math.sin(angle + Math.PI / 2) * petalWidth
+			path += `L ${x} ${y} `
+		}
+		svgContent += `<path class="line" d="${path}"/>`
+	}
+	return svgContent
+}
+
+function generateSnowflakeSVG(params) {
+	let svgContent = ''
+	const numBranches = 6
+	const branchLength = 80 * params.scale
+	const depth = Math.max(1, Math.min(4, params.complexity))
+
+	function branchPath(x, y, angle, length, d) {
+		let content = ''
+		const x2 = x + Math.cos(angle) * length
+		const y2 = y + Math.sin(angle) * length
+		content += `<line class=\"line\" x1=\"${x}\" y1=\"${y}\" x2=\"${x2}\" y2=\"${y2}\"/>`
+		if (d === 0) return content
+		content += branchPath(x2, y2, angle + Math.PI / 6, length * 0.4, d - 1)
+		content += branchPath(x2, y2, angle - Math.PI / 6, length * 0.4, d - 1)
+		return content
+	}
+
+	for (let i = 0; i < numBranches; i++) {
+		const angle = (2 * Math.PI / numBranches) * i
+		svgContent += branchPath(params.centerX, params.centerY, angle, branchLength, depth)
+	}
+	return svgContent
+}
+
+function generateLatticeSVG(params) {
+	let svgContent = ''
+	const cellSize = 30 / params.complexity
+	let offset = 0
+	for (let x = 0; x < params.width; x += cellSize) {
+		for (let y = 0; y < params.height; y += cellSize) {
+			if (((x + y) / cellSize) % 2 === 0) {
+				svgContent += `<rect class=\"line\" x=\"${x + offset}\" y=\"${y + offset}\" width=\"${cellSize}\" height=\"${cellSize}\"/>`
+			}
+		}
+		offset += 0.5
+	}
+	return svgContent
+}
+
+function generateVoronoiSVG(params) {
+	let svgContent = ''
+	const numPoints = 15 * params.complexity
+	const points = []
+	for (let i = 0; i < numPoints; i++) {
+		points.push({ x: Math.random() * params.width, y: Math.random() * params.height })
+	}
+	for (let i = 0; i < points.length; i++) {
+		const distances = []
+		for (let j = 0; j < points.length; j++) {
+			if (i !== j) {
+				const dx = points[i].x - points[j].x
+				const dy = points[i].y - points[j].y
+				distances.push({ index: j, distance: Math.sqrt(dx * dx + dy * dy) })
+			}
+		}
+		distances.sort((a, b) => a.distance - b.distance)
+		for (let k = 0; k < Math.min(3, distances.length); k++) {
+			const n = distances[k]
+			svgContent += `<line class=\"line\" x1=\"${points[i].x}\" y1=\"${points[i].y}\" x2=\"${points[n.index].x}\" y2=\"${points[n.index].y}\"/>`
+		}
+	}
+	return svgContent
+}
+
+function generateFlowSVG(params) {
+	let svgContent = ''
+	const numStreams = 5 * params.complexity
+	for (let s = 0; s < numStreams; s++) {
+		let x = Math.random() * params.width
+		let y = Math.random() * params.height
+		let path = `M ${x} ${y} `
+		for (let i = 0; i < 50; i++) {
+			x += Math.random() * 40 - 20
+			y += Math.random() * 40 - 20
+			path += `L ${x} ${y} `
+		}
+		svgContent += `<path class=\"line\" d=\"${path}\"/>`
+	}
+	return svgContent
+}
+
+function generateOrbitSVG(params) {
+	let svgContent = ''
+	const numOrbits = 3 + params.complexity
+	const baseRadius = 50 * params.scale
+	for (let o = 0; o < numOrbits; o++) {
+		const radius = baseRadius + o * 60 * params.scale
+		svgContent += `<circle class=\"line\" cx=\"${params.centerX}\" cy=\"${params.centerY}\" r=\"${radius}\"/>`
+		const numObjects = 3 + o
+		for (let i = 0; i < numObjects; i++) {
+			const angle = (2 * Math.PI / numObjects) * i
+			const x = params.centerX + Math.cos(angle) * radius
+			const y = params.centerY + Math.sin(angle) * radius
+			svgContent += `<circle class=\"line\" cx=\"${x}\" cy=\"${y}\" r=\"5\"/>`
+		}
+	}
 	return svgContent
 }
 
@@ -1183,10 +1418,10 @@ function generateNebulaGCode(params, settings) {
 	for (let i = 0; i < numCurves; i++) {
 		let firstPoint = true
 		
-		for (let t = 0; t <= 1; t += 0.01) {
+		for (let t = 0; t < 1; t += 0.01) {
 			// Match exact nebula calculation from sketch.js
-			const baseX = params.centerX + Math.cos(t * Math.PI * 4 + i) * (100 + Math.sin(t * 10) * 50)
-			const baseY = params.centerY + Math.sin(t * Math.PI * 4 + i) * (100 + Math.cos(t * 10) * 50)
+			const baseX = params.centerX + Math.cos(t * Math.PI * 2 * 2 + i) * (100 + Math.sin(t * 10) * 50)
+			const baseY = params.centerY + Math.sin(t * Math.PI * 2 * 2 + i) * (100 + Math.cos(t * 10) * 50)
 			
 			let pos = { x: baseX, y: baseY }
 			pos = addRandomness(pos.x, pos.y, params.randomness)
