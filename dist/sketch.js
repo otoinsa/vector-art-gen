@@ -313,9 +313,16 @@ var sketch = function(p) {
 		for (var i = 0; i < numCurves; i++) {
 			p.beginShape()
 			for (var t = 0; t < 1; t += 0.01) {
-				var x = centerX + p.cos(t * p.TWO_PI * 2 + i) * (100 + p.sin(t * 10) * 50)
-				var y = centerY + p.sin(t * p.TWO_PI * 2 + i) * (100 + p.cos(t * 10) * 50)
-				p.vertex(x, y)
+				var baseX = centerX + p.cos(t * p.TWO_PI * 2 + i) * (100 + p.sin(t * 10) * 50)
+				var baseY = centerY + p.sin(t * p.TWO_PI * 2 + i) * (100 + p.cos(t * 10) * 50)
+				
+				// Apply randomness if set
+				if (randomness > 0) {
+					baseX += p.random(-randomness * 10, randomness * 10)
+					baseY += p.random(-randomness * 10, randomness * 10)
+				}
+				
+				p.vertex(baseX, baseY)
 			}
 			p.endShape()
 		}
